@@ -1,11 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
-/**
- * Server-side Supabase client.
- * Use in Server Components, Server Actions, and Route Handlers.
- * Reads/writes auth tokens via HTTP-only cookies.
- */
 export async function createClient() {
   const cookieStore = await cookies()
 
@@ -22,12 +17,11 @@ export async function createClient() {
             cookiesToSet.forEach(({ name, value, options }) => {
               cookieStore.set(name, value, options)
             })
-          } catch {
-            // setAll is called from a Server Component; cookies can only be
-            // mutated in middleware or Server Actions — safely ignore here.
+          } catch (error) {
+            // Manejado silenciosamente porque esto se llama desde Server Components
           }
         },
       },
-    },
+    }
   )
 }
