@@ -1,0 +1,44 @@
+{
+  "name": "ai-content-generator",
+  "version": "1.0.0",
+  "description": "AI-powered social media content generation platform",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
+    "test": "jest",
+    "test:unit": "jest tests/unit",
+    "test:integration": "jest tests/integration",
+    "test:edge": "jest tests/integration/edgeCases.test.js",
+    "test:performance": "jest tests/integration/performance.test.js",
+    "test:real": "REAL_AI_TESTS=true jest tests/integration/realAI.test.js",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:ci": "jest --ci --coverage --watchAll=false"
+  },
+  "keywords": [
+    "ai",
+    "content-generation",
+    "social-media",
+    "saas"
+  ],
+  "author": "Riwi Tech Education",
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "groq-sdk": "^0.3.3",
+    "helmet": "^7.1.0",
+    "joi": "^17.11.0",
+    "winston": "^3.11.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.23.0",
+    "@babel/preset-env": "^7.29.2",
+    "babel-jest": "^29.7.0",
+    "jest": "^29.7.0",
+    "nodemon": "^3.0.2",
+    "supertest": "^6.3.3"
+  }
+}

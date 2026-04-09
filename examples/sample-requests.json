@@ -1,0 +1,117 @@
+{
+  "examples": [
+    {
+      "description": "Instagram casual content about web development",
+      "request": {
+        "topic": "responsive web design tips",
+        "platform": "instagram",
+        "tone": "casual"
+      },
+      "expected_response": {
+        "title": "Responsive Design Made Easy",
+        "post": "Want your websites to look amazing on all devices? Here are 5 quick tips for responsive design that actually work! #WebDev",
+        "hashtags": ["webdesign", "responsive", "css", "html", "frontend", "coding", "webdev", "riwi"],
+        "type": "carousel",
+        "visualIdea": "Before/after comparison of mobile and desktop layouts"
+      }
+    },
+    {
+      "description": "LinkedIn professional content about AI",
+      "request": {
+        "topic": "AI implementation in business",
+        "platform": "linkedin",
+        "tone": "professional"
+      },
+      "expected_response": {
+        "title": "Strategic AI Integration",
+        "post": "As AI continues to transform industries, businesses must develop comprehensive implementation strategies. Recent studies show that organizations with structured AI adoption see 40% higher productivity gains.",
+        "hashtags": ["AI", "businessstrategy", "digitaltransformation", "innovation", "technology", "leadership", "machinelearning"],
+        "type": "post",
+        "visualIdea": "Professional infographic showing AI adoption statistics and ROI metrics"
+      }
+    },
+    {
+      "description": "TikTok motivational content about coding",
+      "request": {
+        "topic": "learning to code",
+        "platform": "tiktok",
+        "tone": "motivational"
+      },
+      "expected_response": {
+        "title": "Code Your Dreams",
+        "post": "Don't just use technology - create it! Every expert was once a beginner. Start your coding journey today and build tomorrow's innovations! #CodingJourney",
+        "hashtags": ["coding", "programming", "tech", "learntocode", "developer", "codinglife", "motivation", "riwi"],
+        "type": "reel",
+        "visualIdea": "Fast-paced montage of code transforming into real applications"
+      }
+    },
+    {
+      "description": "Instagram carousel about data science",
+      "request": {
+        "topic": "data science career path",
+        "platform": "instagram",
+        "tone": "casual"
+      },
+      "expected_response": {
+        "title": "Data Science Roadmap",
+        "post": "Thinking about a career in data science? Here's your step-by-step guide from beginner to data scientist! Swipe through to learn the skills you need. #DataScience",
+        "hashtags": ["datascience", "analytics", "machinelearning", "python", "career", "tech", "learning", "riwi"],
+        "type": "carousel",
+        "visualIdea": "5-slide educational carousel with career progression timeline"
+      }
+    },
+    {
+      "description": "LinkedIn professional content about cloud computing",
+      "request": {
+        "topic": "cloud security best practices",
+        "platform": "linkedin",
+        "tone": "professional"
+      },
+      "expected_response": {
+        "title": "Cloud Security Framework",
+        "post": "As organizations accelerate cloud adoption, robust security frameworks become critical. Implement these 7 essential practices to protect your cloud infrastructure and maintain compliance standards.",
+        "hashtags": ["cloudsecurity", "cybersecurity", "cloudcomputing", "enterprise", "tech", "security", "compliance"],
+        "type": "post",
+        "visualIdea": "Professional diagram showing security layers and best practices"
+      }
+    }
+  ],
+  "error_examples": [
+    {
+      "description": "Invalid platform",
+      "request": {
+        "topic": "web development",
+        "platform": "facebook",
+        "tone": "casual"
+      },
+      "expected_error": "Platform must be one of: instagram, linkedin, tiktok"
+    },
+    {
+      "description": "Invalid tone",
+      "request": {
+        "topic": "web development",
+        "platform": "instagram",
+        "tone": "funny"
+      },
+      "expected_error": "Tone must be one of: casual, professional, motivational"
+    },
+    {
+      "description": "Empty topic",
+      "request": {
+        "topic": "",
+        "platform": "instagram",
+        "tone": "casual"
+      },
+      "expected_error": "Topic cannot be empty"
+    },
+    {
+      "description": "Topic too short",
+      "request": {
+        "topic": "AI",
+        "platform": "instagram",
+        "tone": "casual"
+      },
+      "expected_error": "Topic must be at least 3 characters long"
+    }
+  ]
+}
