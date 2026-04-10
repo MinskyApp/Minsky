@@ -6,8 +6,8 @@ const logger = require('../utils/logger');
 
 let io;
 
-function initSocketIO(httpServer) {
-  io = new Server(httpServer, {
+function initSocketIO(fastifyInstance) {
+  io = new Server(fastifyInstance.server, {
     cors: { origin: '*', methods: ['GET', 'POST'] },
     pingTimeout: 60000,
     pingInterval: 25000,
@@ -17,8 +17,7 @@ function initSocketIO(httpServer) {
     logger.debug(`Cliente conectado: ${socket.id}`);
 
     // Enviar estado actual al cliente que se conecta
-    const app = require('./app');
-    const orchestrator = app.get ? app.get('orchestrator') : null;
+    const orchestrator = fastifyInstance.orchestrator;
     if (orchestrator) {
       socket.emit('status:full', orchestrator.getStatus());
     }
@@ -26,7 +25,7 @@ function initSocketIO(httpServer) {
     // Comandos
     socket.on('stream:start', async (options) => {
       try {
-        const orch = require('./app').get('orchestrator');
+        const orch = fastifyInstance.orchestrator;
         await orch.startStream(options);
       } catch (err) {
         socket.emit('stream:error', { error: err.message });
@@ -35,7 +34,7 @@ function initSocketIO(httpServer) {
 
     socket.on('stream:stop', async () => {
       try {
-        const orch = require('./app').get('orchestrator');
+        const orch = fastifyInstance.orchestrator;
         await orch.stopStream();
       } catch (err) {
         socket.emit('stream:error', { error: err.message });
@@ -44,7 +43,7 @@ function initSocketIO(httpServer) {
 
     socket.on('obs:connect', async () => {
       try {
-        const orch = require('./app').get('orchestrator');
+        const orch = fastifyInstance.orchestrator;
         await orch.connectOBS();
       } catch (err) {
         socket.emit('obs:error', { error: err.message });
@@ -53,7 +52,7 @@ function initSocketIO(httpServer) {
 
     socket.on('scene:switch', async ({ scene }) => {
       try {
-        const orch = require('./app').get('orchestrator');
+        const orch = fastifyInstance.orchestrator;
         await orch.switchScene(scene);
       } catch (err) {
         socket.emit('error', { error: err.message });
@@ -62,7 +61,7 @@ function initSocketIO(httpServer) {
 
     socket.on('audio:mute', async ({ source, muted }) => {
       try {
-        const orch = require('./app').get('orchestrator');
+        const orch = fastifyInstance.orchestrator;
         await orch.setAudioMute(source, muted);
       } catch (err) {
         socket.emit('error', { error: err.message });
@@ -71,7 +70,7 @@ function initSocketIO(httpServer) {
 
     socket.on('preview:start', () => {
       try {
-        const orch = require('./app').get('orchestrator');
+        const orch = fastifyInstance.orchestrator;
         if (orch && orch.obs) orch.obs.startPreviewInterval(4); // 4 fps preview
       } catch (err) {
         logger.error('Error starting preview:', err.message);
@@ -80,7 +79,7 @@ function initSocketIO(httpServer) {
 
     socket.on('preview:stop', () => {
       try {
-        const orch = require('./app').get('orchestrator');
+        const orch = fastifyInstance.orchestrator;
         if (orch && orch.obs) orch.obs.stopPreviewInterval();
       } catch (err) {
         logger.error('Error stopping preview:', err.message);

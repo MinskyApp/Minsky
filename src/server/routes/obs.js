@@ -1,94 +1,111 @@
 // =====================================================
-// Route: /api/obs - Control OBS
+// Route: /api/obs - Control OBS (Fastify Plugin)
 // =====================================================
 'use strict';
 
-const router = require('express').Router();
+async function obsRoutes(fastify, options) {
+  // POST /api/obs/connect
+  fastify.post('/connect', async (request, reply) => {
+    try {
+      const orchestrator = fastify.orchestrator;
+      await orchestrator.connectOBS();
+      return { success: true };
+    } catch (err) {
+      reply.status(500);
+      return { success: false, error: err.message };
+    }
+  });
 
-function orch(req) { return req.app.get('orchestrator'); }
+  // POST /api/obs/disconnect
+  fastify.post('/disconnect', async (request, reply) => {
+    try {
+      const orchestrator = fastify.orchestrator;
+      await orchestrator.disconnectOBS();
+      return { success: true };
+    } catch (err) {
+      reply.status(500);
+      return { success: false, error: err.message };
+    }
+  });
 
-// POST /api/obs/connect
-router.post('/connect', async (req, res) => {
-  try {
-    await orch(req).connectOBS();
-    res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
+  // GET /api/obs/scenes
+  fastify.get('/scenes', async (request, reply) => {
+    try {
+      const orchestrator = fastify.orchestrator;
+      const scenes = await orchestrator.getSceneList();
+      return { success: true, scenes };
+    } catch (err) {
+      reply.status(500);
+      return { success: false, error: err.message };
+    }
+  });
 
-// POST /api/obs/disconnect
-router.post('/disconnect', async (req, res) => {
-  try {
-    await orch(req).disconnectOBS();
-    res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
+  // POST /api/obs/scene
+  fastify.post('/scene', async (request, reply) => {
+    const orchestrator = fastify.orchestrator;
+    const { scene } = request.body;
+    if (!scene) {
+      reply.status(400);
+      return { success: false, error: 'scene requerido' };
+    }
+    try {
+      await orchestrator.switchScene(scene);
+      return { success: true, scene };
+    } catch (err) {
+      reply.status(500);
+      return { success: false, error: err.message };
+    }
+  });
 
-// GET /api/obs/scenes
-router.get('/scenes', async (req, res) => {
-  try {
-    const scenes = await orch(req).getSceneList();
-    res.json({ success: true, scenes });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
+  // GET /api/obs/audio
+  fastify.get('/audio', async (request, reply) => {
+    try {
+      const orchestrator = fastify.orchestrator;
+      const sources = await orchestrator.getAudioSources();
+      return { success: true, sources };
+    } catch (err) {
+      reply.status(500);
+      return { success: false, error: err.message };
+    }
+  });
 
-// POST /api/obs/scene
-router.post('/scene', async (req, res) => {
-  const { scene } = req.body;
-  if (!scene) return res.status(400).json({ success: false, error: 'scene requerido' });
-  try {
-    await orch(req).switchScene(scene);
-    res.json({ success: true, scene });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
+  // POST /api/obs/audio/mute
+  fastify.post('/audio/mute', async (request, reply) => {
+    const orchestrator = fastify.orchestrator;
+    const { source, muted } = request.body;
+    try {
+      await orchestrator.setAudioMute(source, muted);
+      return { success: true };
+    } catch (err) {
+      reply.status(500);
+      return { success: false, error: err.message };
+    }
+  });
 
-// GET /api/obs/audio
-router.get('/audio', async (req, res) => {
-  try {
-    const sources = await orch(req).getAudioSources();
-    res.json({ success: true, sources });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
+  // POST /api/obs/audio/volume
+  fastify.post('/audio/volume', async (request, reply) => {
+    const orchestrator = fastify.orchestrator;
+    const { source, volumeDb } = request.body;
+    try {
+      await orchestrator.setAudioVolume(source, volumeDb);
+      return { success: true };
+    } catch (err) {
+      reply.status(500);
+      return { success: false, error: err.message };
+    }
+  });
 
-// POST /api/obs/audio/mute
-router.post('/audio/mute', async (req, res) => {
-  const { source, muted } = req.body;
-  try {
-    await orch(req).setAudioMute(source, muted);
-    res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
+  // GET /api/obs/stats
+  fastify.get('/stats', async (request, reply) => {
+    try {
+      const orchestrator = fastify.orchestrator;
+      const stats = await orchestrator.obs.getStats();
+      return { success: true, stats };
+    } catch (err) {
+      reply.status(500);
+      return { success: false, error: err.message };
+    }
+  });
+}
 
-// POST /api/obs/audio/volume
-router.post('/audio/volume', async (req, res) => {
-  const { source, volumeDb } = req.body;
-  try {
-    await orch(req).setAudioVolume(source, volumeDb);
-    res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
-
-// GET /api/obs/stats
-router.get('/stats', async (req, res) => {
-  try {
-    const stats = await orch(req).obs.getStats();
-    res.json({ success: true, stats });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
-
-module.exports = router;
+module.exports = obsRoutes;

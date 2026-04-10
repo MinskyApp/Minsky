@@ -1,47 +1,50 @@
 // =====================================================
-// Route: /api/stream - Control del Stream
+// Route: /api/stream - Control del Stream (Fastify Plugin)
 // =====================================================
 'use strict';
 
-const router = require('express').Router();
+async function streamRoutes(fastify, options) {
+  // POST /api/stream/start
+  fastify.post('/start', async (request, reply) => {
+    try {
+      const orchestrator = fastify.orchestrator;
+      const session = await orchestrator.startStream(request.body);
+      return { success: true, session };
+    } catch (err) {
+      reply.status(400);
+      return { success: false, error: err.message };
+    }
+  });
 
-function orchestrator(req) {
-  return req.app.get('orchestrator');
+  // POST /api/stream/stop
+  fastify.post('/stop', async (request, reply) => {
+    try {
+      const orchestrator = fastify.orchestrator;
+      await orchestrator.stopStream();
+      return { success: true };
+    } catch (err) {
+      reply.status(400);
+      return { success: false, error: err.message };
+    }
+  });
+
+  // GET /api/stream/status
+  fastify.get('/status', async (request, reply) => {
+    const orchestrator = fastify.orchestrator;
+    return { success: true, data: orchestrator.getStatus() };
+  });
+
+  // POST /api/stream/reconnect
+  fastify.post('/reconnect', async (request, reply) => {
+    try {
+      const orchestrator = fastify.orchestrator;
+      await orchestrator.reconnect();
+      return { success: true };
+    } catch (err) {
+      reply.status(500);
+      return { success: false, error: err.message };
+    }
+  });
 }
 
-// POST /api/stream/start
-router.post('/start', async (req, res) => {
-  try {
-    const session = await orchestrator(req).startStream(req.body);
-    res.json({ success: true, session });
-  } catch (err) {
-    res.status(400).json({ success: false, error: err.message });
-  }
-});
-
-// POST /api/stream/stop
-router.post('/stop', async (req, res) => {
-  try {
-    await orchestrator(req).stopStream();
-    res.json({ success: true });
-  } catch (err) {
-    res.status(400).json({ success: false, error: err.message });
-  }
-});
-
-// GET /api/stream/status
-router.get('/status', (req, res) => {
-  res.json({ success: true, data: orchestrator(req).getStatus() });
-});
-
-// POST /api/stream/reconnect
-router.post('/reconnect', async (req, res) => {
-  try {
-    await orchestrator(req).reconnect();
-    res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
-
-module.exports = router;
+module.exports = streamRoutes;

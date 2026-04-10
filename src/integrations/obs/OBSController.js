@@ -129,10 +129,11 @@ class OBSController {
     return this.obs.call(method, params);
   }
 
-  async setVideoSettings({ resolution = '1080p', fps = 30, bitrate = 4000 }) {
+  async setVideoSettings({ resolution = '1080p', fps = 30, bitrate = 4500 }) {
     const res = RESOLUTION_MAP[resolution] || RESOLUTION_MAP['1080p'];
     
     try {
+      // 1. Configurar resolución y FPS
       await this.obs.call('SetVideoSettings', {
         baseWidth: res.width,
         baseHeight: res.height,
@@ -142,17 +143,23 @@ class OBSController {
         fpsDenominator: 1,
       });
       logger.info(`Video: ${resolution} @ ${fps}fps`);
+
+      // 2. Intentar configurar bitrate en el encoder (Simple Output)
+      // Nota: Esto depende de la configuración de OBS, pero intentamos setearlo
+      try {
+        await this.obs.call('SetProfileParameter', {
+          parameterCategory: 'SimpleOutput',
+          parameterName: 'VBitrate',
+          parameterValue: bitrate.toString(),
+        });
+        logger.info(`Bitrate configurado: ${bitrate} kbps`);
+      } catch (e) {
+        logger.debug('No se pudo setear bitrate mediante SetProfileParameter (posiblemente en modo avanzado)');
+      }
+
     } catch (err) {
       logger.warn('No se pudo ajustar configuración de video:', err.message);
     }
-
-    // Configurar encoder/bitrate
-    try {
-      await this.obs.call('SetStreamServiceSettings', {
-        streamServiceType: 'rtmp_custom',
-        streamServiceSettings: {},
-      });
-    } catch {}
   }
 
   async setStreamSettings({ server, key }) {

@@ -1,4 +1,4 @@
-// MultiStream Pro - Main Entry Point
+// MultiStream Pro - Main Entry Point (Fastify Edition)
 'use strict';
 
 require('dotenv').config();
@@ -8,13 +8,12 @@ if (process.env.STRICT_SSL === '0') {
   process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
   console.warn('ADVERTENCIA: Verificación SSL estricta desactivada (STRICT_SSL=0)');
 }
-const { createServer } = require('http');
-const app = require('./server/app');
+
+const buildApp = require('./server/app');
 const { initSocketIO } = require('./server/socket');
 const logger = require('./utils/logger');
 const { printBanner } = require('./utils/banner');
 const StreamOrchestrator = require('./core/StreamOrchestrator');
-const preStreamCheck = require('./utils/preStreamCheck');
 
 const PORT = process.env.DASHBOARD_PORT || 3000;
 const HOST = process.env.DASHBOARD_HOST || '0.0.0.0';
@@ -22,38 +21,43 @@ const HOST = process.env.DASHBOARD_HOST || '0.0.0.0';
 async function main() {
   printBanner(PORT);
 
-  // Servidor HTTP
-  const httpServer = createServer(app);
+  // 1. Construir Instancia Fastify
+  const app = await buildApp();
   
-  // Socket.IO
-  const io = initSocketIO(httpServer);
+  // 2. Inicializar Socket.IO (conectado al server de Fastify)
+  const io = initSocketIO(app);
 
-  // Orquestador
+  // 3. Inicializar Orquestador
   const orchestrator = new StreamOrchestrator(io);
   
-  // Hacer el orquestador disponible globalmente en la app
-  app.set('orchestrator', orchestrator);
-  app.set('io', io);
+  // 4. Decorar app de Fastify para que las rutas tengan acceso
+  app.decorate('orchestrator', orchestrator);
+  app.decorate('io', io);
 
-  // Iniciar servidor
-  httpServer.listen(PORT, HOST, async () => {
-    logger.info(`Dashboard iniciado en http://${HOST}:${PORT}`);
+  // 5. Iniciar servidor Fastify
+  try {
+    const address = await app.listen({ port: PORT, host: HOST });
+    logger.info(`Dashboard iniciado en ${address}`);
     logger.info(`Sistema de streaming listo`);
     
+    // Intento de conexión inicial a OBS
     try {
       await orchestrator.connectOBS();
     } catch (err) {
       logger.warn('OBS no disponible al inicio. Puedes conectar desde el dashboard.');
     }
-  });
+  } catch (err) {
+    logger.error('Fallo al iniciar el servidor:', err);
+    process.exit(1);
+  }
 
   // Señales del sistema
-  process.on('SIGTERM', () => shutdown(orchestrator, httpServer));
-  process.on('SIGINT', () => shutdown(orchestrator, httpServer));
+  process.on('SIGTERM', () => shutdown(orchestrator, app));
+  process.on('SIGINT', () => shutdown(orchestrator, app));
   
   process.on('uncaughtException', (err) => {
     logger.error('Error no capturado:', err);
-    shutdown(orchestrator, httpServer);
+    shutdown(orchestrator, app);
   });
 
   process.on('unhandledRejection', (reason) => {
@@ -61,7 +65,7 @@ async function main() {
   });
 }
 
-async function shutdown(orchestrator, server) {
+async function shutdown(orchestrator, app) {
   logger.info('Apagando MultiStream Pro...');
   
   try {
@@ -74,13 +78,14 @@ async function shutdown(orchestrator, server) {
     logger.error('Error durante apagado:', err.message);
   }
 
-  server.close(() => {
-    logger.info('Servidor cerrado correctamente');
-    process.exit(0);
-  });
+  try {
+    await app.close();
+    logger.info('Servidor Fastify cerrado correctamente');
+  } catch (err) {
+    logger.error('Error cerrando Fastify:', err.message);
+  }
 
-  // Forzar cierre después de 10 segundos
-  setTimeout(() => process.exit(1), 10000);
+  process.exit(0);
 }
 
 main().catch((err) => {

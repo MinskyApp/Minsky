@@ -1,67 +1,77 @@
-// Express App - Servidor Web
+// Fastify App - Servidor Web de Alto Rendimiento
 'use strict';
 
-const express = require('express');
-const cors = require('cors');
-const helmet = require('helmet');
-const rateLimit = require('express-rate-limit');
+const fastify = require('fastify')({
+  logger: false // Usamos nuestro propio logger
+});
 const path = require('path');
 const logger = require('../utils/logger');
 
+// Plugins de Fastify
+const cors = require('@fastify/cors');
+const helmet = require('@fastify/helmet');
+const rateLimit = require('@fastify/rate-limit');
+const fastifyStatic = require('@fastify/static');
+
+// Rutas (Plugins)
 const streamRoutes = require('./routes/stream');
 const obsRoutes   = require('./routes/obs');
 const authRoutes  = require('./routes/auth');
 const statusRoutes = require('./routes/status');
 
-const app = express();
-
-// Seguridad
-app.use(helmet({
-  contentSecurityPolicy: false, // desactivado para el dashboard
-}));
-
-app.use(cors({
-  origin: '*',
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-}));
-
-app.use(rateLimit({
-  windowMs: 60 * 1000,
-  max: 200,
-  message: { error: 'Demasiadas peticiones, intenta en un momento' },
-}));
-
-// Parsing
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-// Logging
-app.use((req, res, next) => {
-  logger.debug(`${req.method} ${req.path}`);
-  next();
-});
-
-// Archivos estaticos
-app.use(express.static(path.join(__dirname, '../../public')));
-
-// Rutas
-app.use('/api/stream', streamRoutes);
-app.use('/api/obs',    obsRoutes);
-app.use('/api/status', statusRoutes);
-app.use('/auth',       authRoutes);
-
-// Dashboard fallback
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../../public/index.html'));
-});
-
-// Error handler
-app.use((err, req, res, next) => {
-  logger.error('API Error:', err.message);
-  res.status(err.status || 500).json({
-    success: false,
-    error: err.message || 'Error interno del servidor',
+async function buildApp() {
+  // Seguridad
+  await fastify.register(helmet, {
+    contentSecurityPolicy: false, // desactivado para el dashboard
   });
-});
 
-module.exports = app;
+  await fastify.register(cors, {
+    origin: '*',
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+  });
+
+  await fastify.register(rateLimit, {
+    max: 200,
+    timeWindow: '1 minute',
+    errorResponseBuilder: () => ({ error: 'Demasiadas peticiones, intenta en un momento' })
+  });
+
+  // Logging Middleware (vía hook)
+  fastify.addHook('onRequest', async (request, reply) => {
+    logger.debug(`${request.method} ${request.url}`);
+  });
+
+  // Archivos estáticos
+  await fastify.register(fastifyStatic, {
+    root: path.join(__dirname, '../../public'),
+    prefix: '/', // raìz
+  });
+
+  // Registro de Rutas
+  await fastify.register(streamRoutes, { prefix: '/api/stream' });
+  await fastify.register(obsRoutes, { prefix: '/api/obs' });
+  await fastify.register(statusRoutes, { prefix: '/api/status' });
+  await fastify.register(authRoutes, { prefix: '/auth' });
+
+  // Dashboard fallback (SPA support)
+  fastify.setNotFoundHandler((request, reply) => {
+    if (request.url.startsWith('/api')) {
+      reply.status(404).send({ success: false, error: 'Ruta API no encontrada' });
+    } else {
+      reply.sendFile('index.html');
+    }
+  });
+
+  // Error handler global
+  fastify.setErrorHandler((error, request, reply) => {
+    logger.error('API Error:', error.message);
+    reply.status(error.statusCode || 500).send({
+      success: false,
+      error: error.message || 'Error interno del servidor',
+    });
+  });
+
+  return fastify;
+}
+
+module.exports = buildApp;

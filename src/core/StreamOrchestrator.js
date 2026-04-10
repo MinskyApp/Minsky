@@ -341,11 +341,20 @@ class StreamOrchestrator extends EventEmitter {
 
     logger.info('Configurando OBS...');
     
+    // Calcular bitrate óptimo según resolución
+    const resolution = this.activeSession.config.resolution || '1080p';
+    let bitrate = parseInt(process.env.VIDEO_BITRATE) || 4500;
+    
+    if (resolution === '1080p') bitrate = Math.max(bitrate, 4500);
+    else if (resolution === '720p') bitrate = Math.min(bitrate, 3500);
+    else if (resolution === '480p') bitrate = 2000;
+    else if (resolution === '360p') bitrate = 1000;
+
     // Configurar encoder y resolución
     await this.obs.setVideoSettings({
-      resolution: this.activeSession.config.resolution || '1080p',
+      resolution,
       fps: parseInt(process.env.VIDEO_FPS) || 30,
-      bitrate: parseInt(process.env.VIDEO_BITRATE) || 4000,
+      bitrate,
     });
 
     // Configurar RTMP en OBS
@@ -510,7 +519,7 @@ class StreamOrchestrator extends EventEmitter {
       } catch (err) {
         // Silencioso
       }
-    }, 5000);
+    }, 2000);
   }
 
   _stopSystemMonitor() {

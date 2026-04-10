@@ -625,18 +625,6 @@ function showToast(message, type = 'info', duration = 4000) {
   }, duration);
 }
 
-// ── Polling del sistema (fallback si socket falla) ──
-async function pollSystemStats() {
-  try {
-    const res = await fetch('/api/status');
-    const data = await res.json();
-    if (data.data?.system) updateSystemStats({ ...data.data.system, network: { upload: data.data.system.networkUpload } });
-  } catch {}
-}
-
-setInterval(pollSystemStats, 8000);
-pollSystemStats();
-
 // ── Init ──────────────────────────────────────────
 addLog('MultiStream Pro iniciado', 'success');
 addLog('Conecta OBS para comenzar', 'info');

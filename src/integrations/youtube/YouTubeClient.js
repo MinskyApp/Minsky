@@ -78,6 +78,12 @@ class YouTubeClient {
     const frameRate = fps >= 60 ? '60fps' : '30fps';
     const ingestionType = 'rtmp';
 
+    // Normalizar resolución para YouTube API
+    let ytResolution = '1080p';
+    if (resolution === '720p') ytResolution = '720p';
+    else if (resolution === '480p') ytResolution = '480p';
+    else if (resolution === '360p') ytResolution = '360p';
+
     const res = await this.youtube.liveStreams.insert({
       part: ['snippet', 'cdn', 'contentDetails'],
       requestBody: {
@@ -85,7 +91,7 @@ class YouTubeClient {
         cdn: {
           frameRate,
           ingestionType,
-          resolution: resolution === '720p' ? '720p' : '1080p',
+          resolution: ytResolution,
         },
         contentDetails: {
           isReusable: false,

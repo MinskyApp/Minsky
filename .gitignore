@@ -1,6 +1,6 @@
 # MultiStream Pro — .gitignore
 node_modules/
-.env/
+.env
 logs/
 recordings/
 *.log
