@@ -1,8 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { Sidebar } from '@/components/sidebar'
-import { Header } from '@/components/header'
+import { Sidebar } from '@/hooks/components/sidebar'
+import { Header } from '@/hooks/components/header'
 import { useProfile } from '@/hooks/useProfile'
 
 export default function DashboardLayout({
