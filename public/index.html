@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MultiStream Pro — Control de Transmisión</title>
+  <meta name="description" content="Panel de control profesional para transmisión en vivo multicanal con OBS, YouTube, Facebook e Instagram" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- ── SIDEBAR ─────────────────────────────────── -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div>
+        <h2 class="logo-name">MultiStream Pro</h2>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a href="#" class="nav-item active" data-panel="dashboard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Dashboard
+      </a>
+      <a href="#" class="nav-item" data-panel="scenes">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 10l5-5-5-5v3H4v4h11v3z"/><path d="M9 14l-5 5 5 5v-3h11v-4H9v-3z"/></svg>
+        Escenas
+      </a>
+      <a href="#" class="nav-item" data-panel="audio">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+        Audio
+      </a>
+      <a href="#" class="nav-item" data-panel="platforms">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+        Plataformas
+      </a>
+      <a href="#" class="nav-item" data-panel="settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Configuración
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="connection-badge" id="obsStatus">
+        <span class="dot"></span>
+        OBS Desconectado
+      </div>
+    </div>
+  </aside>
+
+  <!-- ── MAIN CONTENT ───────────────────────────── -->
+  <main class="main">
+
+    <!-- ── TOPBAR ─────────────────────────────── -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <h1 id="pageTitle">Dashboard</h1>
+        <span class="breadcrumb">Control Central</span>
+      </div>
+      <div class="topbar-right">
+        <div class="live-timer" id="liveTimer" style="display:none">
+          <span class="live-dot"></span>
+          <span id="timerDisplay">00:00:00</span>
+        </div>
+        <button class="btn-icon" id="btnPrecheck" title="Pre-stream check">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><path d="M21 12c0 4.97-4.03 9-9 9S3 16.97 3 12 7.03 3 12 3s9 4.03 9 9z"/></svg>
+        </button>
+        <button class="btn-icon" id="btnLogs" title="Ver logs">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- ══════════════════════════════════════════ -->
+    <!-- PANEL: DASHBOARD                           -->
+    <!-- ══════════════════════════════════════════ -->
+    <div class="panel active" id="panel-dashboard">
+
+      <!-- Stream Config Card -->
+      <div class="stream-hero">
+        <div class="stream-hero-info">
+          <div class="stream-title-row">
+            <div class="stream-status-indicator" id="streamIndicator">
+              <span class="stream-status-text" id="streamStatusText">Sin transmisión</span>
+            </div>
+            <div id="liveLinkWrapper" style="display:none; margin-top:10px; font-size:13px; background: rgba(56, 189, 248, 0.1); padding: 8px; border-radius: 6px; border: 1px solid rgba(56, 189, 248, 0.2);">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 5px;">
+                <span style="color:#38bdf8; font-weight: 600;">Link del Directo</span>
+                <button id="btnCopyLink" class="btn-icon" title="Copiar enlace" style="padding: 2px 6px; font-size: 11px;">Copiar</button>
+              </div>
+              <a href="#" id="liveLink" target="_blank" style="color:#94a3b8; text-decoration:none; word-break: break-all; display: block; margin-bottom: 8px;"></a>
+              <a href="https://studio.youtube.com/channel/mine/livestreaming" target="_blank" id="youtubeStudioLink" style="display: inline-block; color: #fff; background: #ef4444; padding: 4px 10px; border-radius: 4px; text-decoration: none; font-size: 11px; font-weight: 600;">Abrir Panel YouTube Studio</a>
+            </div>
+          </div>
+          <div class="stream-meta">
+            <input type="text" id="streamTitle" class="stream-title-input" 
+                   placeholder="Título de la transmisión..." 
+                   value="Transmisión en Vivo — Marketing"/>
+            <textarea id="streamDescription" class="stream-desc-input" 
+                      placeholder="Descripción..." rows="2">¡Bienvenidos a nuestra transmisión en vivo!</textarea>
+          </div>
+          <div class="stream-options">
+            <div class="option-group">
+              <label>Privacidad</label>
+              <select id="streamPrivacy" class="select-modern">
+                <option value="public">Público</option>
+                <option value="unlisted">No listado</option>
+                <option value="private">Privado</option>
+              </select>
+            </div>
+            <div class="option-group">
+              <label>Modo</label>
+              <select id="streamMode" class="select-modern">
+                <option value="direct" selected>Directo</option>
+                <option value="restream">Via Restream</option>
+              </select>
+            </div>
+            <div class="option-group">
+              <label>Resolución</label>
+              <select id="streamResolution" class="select-modern">
+                <option value="1080p">1080p HD</option>
+                <option value="720p">720p</option>
+                <option value="480p">480p SD (Ahorro)</option>
+                <option value="360p">360p (Móvil/Bajo Consumo)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Control Buttons -->
+        <div class="stream-controls">
+          <button class="btn-connect-obs" id="btnConnectOBS">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+            Conectar OBS
+          </button>
+          <button class="btn-go-live" id="btnGoLive" disabled>
+            <div class="btn-live-inner">
+              <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8" fill="white"/></svg>
+              <span id="goLiveText">IR EN VIVO</span>
+            </div>
+            <div class="btn-live-glow"></div>
+          </button>
+          <button class="btn-stop" id="btnStop" disabled>
+            <svg viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+            Detener
+          </button>
+        </div>
+
+        <!-- Video Preview -->
+        <div class="stream-preview" id="streamPreviewWrapper">
+          <div class="stream-preview-placeholder" id="previewPlaceholder">
+            <span>Video Desconectado</span>
+          </div>
+          <img id="streamPreviewImg" src="" alt="Video Preview en vivo" style="display:none;"/>
+          
+          <div class="preview-overlay">
+            <span class="preview-badge">PREVIEW</span>
+            <button class="btn-icon preview-toggle" id="btnTogglePreview" title="Encender/Apagar Preview de Video">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Platform Targets -->
+      <div class="platforms-row">
+        <div class="platform-toggle active" data-platform="youtube" id="toggle-youtube">
+          <div class="platform-icon yt">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6a3 3 0 0 0-2.1 2.1C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1C24 15.9 24 12 24 12s0-3.9-.5-5.8zM9.75 15.5V8.5l6.5 3.5-6.5 3.5z"/></svg>
+          </div>
+          <div class="platform-label">
+            <span class="platform-name">YouTube</span>
+            <span class="platform-status" id="ps-youtube">Inactivo</span>
+          </div>
+          <div class="platform-switch">
+            <input type="checkbox" id="sw-youtube" checked>
+            <label for="sw-youtube"></label>
+          </div>
+        </div>
+
+        <div class="platform-toggle active" data-platform="facebook" id="toggle-facebook">
+          <div class="platform-icon fb">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.07C24 5.41 18.63 0 12 0S0 5.41 0 12.07C0 18.1 4.39 23.1 10.13 24v-8.44H7.08v-3.49h3.04V9.41c0-3.02 1.8-4.7 4.54-4.7 1.31 0 2.68.24 2.68.24v2.97h-1.51c-1.49 0-1.95.93-1.95 1.88v2.27h3.32l-.53 3.5h-2.79V24C19.61 23.1 24 18.1 24 12.07z"/></svg>
+          </div>
+          <div class="platform-label">
+            <span class="platform-name">Facebook</span>
+            <span class="platform-status" id="ps-facebook">Inactivo</span>
+          </div>
+          <div class="platform-switch">
+            <input type="checkbox" id="sw-facebook" checked>
+            <label for="sw-facebook"></label>
+          </div>
+        </div>
+
+        <div class="platform-toggle active" data-platform="instagram" id="toggle-instagram">
+          <div class="platform-icon ig">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg>
+          </div>
+          <div class="platform-label">
+            <span class="platform-name">Instagram</span>
+            <span class="platform-status" id="ps-instagram">Inactivo</span>
+          </div>
+          <div class="platform-switch">
+            <input type="checkbox" id="sw-instagram" checked>
+            <label for="sw-instagram"></label>
+          </div>
+        </div>
+
+        <div class="platform-toggle" data-platform="restream" id="toggle-restream">
+          <div class="platform-icon rs">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+          </div>
+          <div class="platform-label">
+            <span class="platform-name">Restream</span>
+            <span class="platform-status" id="ps-restream">Inactivo</span>
+          </div>
+          <div class="platform-switch">
+            <input type="checkbox" id="sw-restream">
+            <label for="sw-restream"></label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stats Grid -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon cpu">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg>
+          </div>
+          <div class="stat-content">
+            <span class="stat-label">CPU</span>
+            <span class="stat-value" id="statCPU">—</span>
+            <div class="stat-bar"><div class="stat-bar-fill cpu-fill" id="barCPU" style="width:0%"></div></div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon mem">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 7h20v13H2z"/><path d="M6 7V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="8" y1="12" x2="8" y2="14"/><line x1="16" y1="12" x2="16" y2="14"/></svg>
+          </div>
+          <div class="stat-content">
+            <span class="stat-label">RAM</span>
+            <span class="stat-value" id="statRAM">—</span>
+            <div class="stat-bar"><div class="stat-bar-fill mem-fill" id="barRAM" style="width:0%"></div></div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon net">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          </div>
+          <div class="stat-content">
+            <span class="stat-label">Upload</span>
+            <span class="stat-value" id="statNet">—</span>
+            <div class="stat-bar"><div class="stat-bar-fill net-fill" id="barNet" style="width:0%"></div></div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon time">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          <div class="stat-content">
+            <span class="stat-label">Tiempo en Vivo</span>
+            <span class="stat-value" id="statUptime">00:00:00</span>
+            <div class="stat-sub" id="statFPS">FPS: —</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Log Panel -->
+      <div class="log-panel" id="logPanel">
+        <div class="log-header">
+          <span>Logs de la API</span>
+          <button class="btn-clear-log" id="btnClearLog">Limpiar</button>
+        </div>
+        <div class="log-body" id="logBody">
+          <div class="log-entry info">Sistema iniciado. Esperando conexión...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════ -->
+    <!-- PANEL: ESCENAS                             -->
+    <!-- ══════════════════════════════════════════ -->
+    <div class="panel" id="panel-scenes">
+      <div class="panel-header">
+        <h2>Control de Escenas</h2>
+        <p>Cambia la escena activa de OBS con un clic</p>
+      </div>
+      <div class="scenes-grid" id="scenesGrid">
+        <!-- Escenas se cargan dinámicamente -->
+        <div class="scene-loading">Conecta OBS para ver las escenas</div>
+      </div>
+      <div class="auto-scene-card">
+        <div class="auto-scene-header">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <span>Secuencia Automática</span>
+        </div>
+        <div class="auto-scene-flow">
+          <div class="flow-step">Intro</div>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          <div class="flow-step">Cámara Principal</div>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          <div class="flow-step">Stream</div>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          <div class="flow-step">Outro</div>
+        </div>
+        <button class="btn-secondary" id="btnAutoSequence">▶ Iniciar Secuencia</button>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════ -->
+    <!-- PANEL: AUDIO                               -->
+    <!-- ══════════════════════════════════════════ -->
+    <div class="panel" id="panel-audio">
+      <div class="panel-header">
+        <h2>Mezclador de Audio</h2>
+        <p>Control de fuentes de audio y filtros en tiempo real</p>
+      </div>
+
+      <div class="audio-filters-card">
+        <h3>Filtros Activos</h3>
+        <div class="filters-grid">
+          <div class="filter-item">
+            <div class="filter-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><path d="M12 2v20M17 5v14M7 9v6"/></svg>
+            </div>
+            <span>Noise Suppression</span>
+            <div class="filter-toggle">
+              <input type="checkbox" id="filterNS" checked>
+              <label for="filterNS"></label>
+            </div>
+          </div>
+          <div class="filter-item">
+            <div class="filter-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+            </div>
+            <span>Compresor</span>
+            <div class="filter-toggle">
+              <input type="checkbox" id="filterComp" checked>
+              <label for="filterComp"></label>
+            </div>
+          </div>
+          <div class="filter-item">
+            <div class="filter-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><path d="M4 14h6m8 0h2m-10 0v-4m0 0h4m-4 0v4m4-4v4"/></svg>
+            </div>
+            <span>Noise Gate</span>
+            <div class="filter-toggle">
+              <input type="checkbox" id="filterNG" checked>
+              <label for="filterNG"></label>
+            </div>
+          </div>
+          <div class="filter-item">
+            <div class="filter-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><path d="M12 20v-8m0 0V4m0 8h8m-8 0H4"/></svg>
+            </div>
+            <span>Limiter (Normalización)</span>
+            <div class="filter-toggle">
+              <input type="checkbox" id="filterLim" checked>
+              <label for="filterLim"></label>
+            </div>
+          </div>
+        </div>
+        <div class="normalize-row">
+          <label>Objetivo normalización</label>
+          <div class="db-slider-wrap">
+            <input type="range" id="normalizeDb" min="-20" max="-6" value="-12" class="slider-modern"/>
+            <span class="db-value" id="normalizeDbVal">-12 dB</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="audio-sources" id="audioSources">
+        <div class="audio-source-loading">Conecta OBS para ver las fuentes de audio</div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════ -->
+    <!-- PANEL: PLATAFORMAS                         -->
+    <!-- ══════════════════════════════════════════ -->
+    <div class="panel" id="panel-platforms">
+      <div class="panel-header">
+        <h2>Integración de Plataformas</h2>
+        <p>Estado de conexión y configuración de cada plataforma</p>
+      </div>
+      <div class="platforms-detail-grid">
+
+        <div class="platform-detail-card" id="plat-youtube">
+          <div class="pd-header">
+            <div class="pd-icon yt">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6a3 3 0 0 0-2.1 2.1C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1C24 15.9 24 12 24 12s0-3.9-.5-5.8zM9.75 15.5V8.5l6.5 3.5-6.5 3.5z"/></svg>
+            </div>
+            <div>
+              <h3>YouTube Live</h3>
+              <span class="pd-status idle" id="yt-status-badge">Inactivo</span>
+            </div>
+          </div>
+          <div class="pd-info">
+            <div class="pd-info-row">
+              <span>API</span><span>YouTube Data v3</span>
+            </div>
+            <div class="pd-info-row">
+              <span>Encoder</span><span>H.264 / RTMP</span>
+            </div>
+            <div class="pd-info-row">
+              <span>Watch URL</span>
+              <span id="yt-watch-url" class="pd-link">—</span>
+            </div>
+          </div>
+          <a href="/auth/youtube" target="_blank" class="btn-platform-auth">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+            Autenticar YouTube
+          </a>
+        </div>
+
+        <div class="platform-detail-card" id="plat-facebook">
+          <div class="pd-header">
+            <div class="pd-icon fb">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.07C24 5.41 18.63 0 12 0S0 5.41 0 12.07C0 18.1 4.39 23.1 10.13 24v-8.44H7.08v-3.49h3.04V9.41c0-3.02 1.8-4.7 4.54-4.7 1.31 0 2.68.24 2.68.24v2.97h-1.51c-1.49 0-1.95.93-1.95 1.88v2.27h3.32l-.53 3.5h-2.79V24C19.61 23.1 24 18.1 24 12.07z"/></svg>
+            </div>
+            <div>
+              <h3>Facebook Live</h3>
+              <span class="pd-status idle" id="fb-status-badge">Inactivo</span>
+            </div>
+          </div>
+          <div class="pd-info">
+            <div class="pd-info-row"><span>API</span><span>Graph API v18</span></div>
+            <div class="pd-info-row"><span>Tipo</span><span>Page Live Video</span></div>
+            <div class="pd-info-row"><span>Video ID</span><span id="fb-video-id">—</span></div>
+          </div>
+          <a href="/auth/facebook" target="_blank" class="btn-platform-auth">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+            Autenticar Facebook
+          </a>
+        </div>
+
+        <div class="platform-detail-card" id="plat-instagram">
+          <div class="pd-header">
+            <div class="pd-icon ig">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg>
+            </div>
+            <div>
+              <h3>Instagram Live</h3>
+              <span class="pd-status idle" id="ig-status-badge">Inactivo</span>
+            </div>
+          </div>
+          <div class="pd-info">
+            <div class="pd-info-row"><span>API</span><span>Meta Graph API</span></div>
+            <div class="pd-info-row"><span>Modo</span><span>Vía Restream (recomendado)</span></div>
+            <div class="pd-info-row"><span>Nota</span><span style="color:#f59e0b;font-size:11px">Requiere Meta Business</span></div>
+          </div>
+          <div class="btn-platform-auth disabled">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            Configurar en Restream
+          </div>
+        </div>
+
+        <div class="platform-detail-card" id="plat-restream">
+          <div class="pd-header">
+            <div class="pd-icon rs">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+            </div>
+            <div>
+              <h3>Restream</h3>
+              <span class="pd-status idle" id="rs-status-badge">Inactivo</span>
+            </div>
+          </div>
+          <div class="pd-info">
+            <div class="pd-info-row"><span>Rol</span><span>Multistream Hub</span></div>
+            <div class="pd-info-row"><span>RTMP</span><span>rtmp://live.restream.io/live</span></div>
+            <div class="pd-info-row"><span>Destinos</span><span id="rs-targets">—</span></div>
+          </div>
+          <a href="/auth/restream" target="_blank" class="btn-platform-auth">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+            Autenticar Restream
+          </a>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════ -->
+    <!-- PANEL: CONFIGURACIÓN                       -->
+    <!-- ══════════════════════════════════════════ -->
+    <div class="panel" id="panel-settings">
+      <div class="panel-header">
+        <h2>Configuración del Sistema</h2>
+        <p>Ajustes de OBS, video, audio y conexiones</p>
+      </div>
+
+      <div class="settings-grid">
+        <div class="settings-card">
+          <h3>OBS WebSocket</h3>
+          <div class="settings-form">
+            <div class="form-row">
+              <label>Host</label>
+              <input type="text" id="cfg-obs-host" placeholder="localhost" value="localhost"/>
+            </div>
+            <div class="form-row">
+              <label>Puerto</label>
+              <input type="number" id="cfg-obs-port" placeholder="4455" value="4455"/>
+            </div>
+            <div class="form-row">
+              <label>Password</label>
+              <input type="password" id="cfg-obs-password" placeholder="••••••••"/>
+            </div>
+            <button class="btn-secondary" id="btnTestOBS">Probar conexión</button>
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <h3>Video</h3>
+          <div class="settings-form">
+            <div class="form-row">
+              <label>Resolución</label>
+              <select id="cfg-resolution" class="select-modern">
+                <option value="1080p">1080p Full HD</option>
+                <option value="720p">720p HD</option>
+                <option value="1440p">1440p 2K</option>
+              </select>
+            </div>
+            <div class="form-row">
+              <label>FPS</label>
+              <select id="cfg-fps" class="select-modern">
+                <option value="30">30 FPS</option>
+                <option value="60">60 FPS</option>
+              </select>
+            </div>
+            <div class="form-row">
+              <label>Bitrate (kbps)</label>
+              <input type="number" id="cfg-bitrate" value="4000" min="1000" max="12000"/>
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <h3>Audio</h3>
+          <div class="settings-form">
+            <div class="form-row">
+              <label>Bitrate Audio</label>
+              <select id="cfg-audio-bitrate" class="select-modern">
+                <option value="128">128 kbps</option>
+                <option value="160" selected>160 kbps</option>
+                <option value="192">192 kbps</option>
+                <option value="320">320 kbps</option>
+              </select>
+            </div>
+            <div class="form-row">
+              <label>Objetivo dB</label>
+              <input type="number" id="cfg-audio-db" value="-12" min="-20" max="-6"/>
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <h3>Pre-stream Check</h3>
+          <button class="btn-primary full-width" id="btnRunPrecheck">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><path d="M21 12c0 4.97-4.03 9-9 9S3 16.97 3 12 7.03 3 12 3s9 4.03 9 9z"/></svg>
+            Ejecutar Diagnóstico
+          </button>
+          <div id="precheckResults" class="precheck-results"></div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ── MODAL: Logs ────────────────────────────── -->
+  <div class="modal-overlay" id="logsModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Logs de la API</h3>
+        <button class="modal-close" id="closeLogsModal">✕</button>
+      </div>
+      <div class="log-body tall" id="logsModalBody"></div>
+    </div>
+  </div>
+
+  <!-- ── TOAST NOTIFICATIONS ───────────────────── -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
