@@ -5,3 +5,4 @@ logs/
 recordings/
 *.log
 .DS_Store
+scratch/

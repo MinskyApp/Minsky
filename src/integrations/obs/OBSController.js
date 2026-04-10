@@ -27,10 +27,15 @@ class OBSController {
 
     // Eventos OBS
     this.obs.on('ConnectionClosed', () => {
+      const wasConnected = this.connected;
       this.connected = false;
       logger.warn('OBS WebSocket desconectado');
       this.emitEvent('obs:disconnected');
-      this._attemptReconnect();
+      
+      // Solo intentar reconectar si perdimos una conexión activa
+      if (wasConnected) {
+        this._attemptReconnect();
+      }
     });
 
     this.obs.on('StreamStateChanged', (data) => {
