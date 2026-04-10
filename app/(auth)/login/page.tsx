@@ -18,24 +18,8 @@ export default function LoginPage() {
       <div className="login-card">
         {/* Logo */}
         <div className="login-logo-wrap">
-          <div className="login-logo-icon">
-            <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true">
-              <rect width="28" height="28" rx="8" fill="url(#gradient)" />
-              <path
-                d="M7 21V10l7-3 7 3v11"
-                stroke="white"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              <rect x="11" y="14" width="6" height="7" rx="1" fill="white" fillOpacity="0.9" />
-              <defs>
-                <linearGradient id="gradient" x1="0" y1="0" x2="28" y2="28" gradientUnits="userSpaceOnUse">
-                  <stop stopColor="#7c3aed" />
-                  <stop offset="1" stopColor="#4f46e5" />
-                </linearGradient>
-              </defs>
-            </svg>
+          <div className="login-logo-icon" style={{ background: 'transparent' }}>
+            <img src="/logo.png" alt="Minsky Logo" style={{ width: 64, height: 64 }} />
           </div>
           <span className="login-logo-name">Minsky</span>
         </div>
